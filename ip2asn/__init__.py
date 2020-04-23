@@ -50,8 +50,14 @@ class IP2ASN():
         self._data = []
         self._left_keys = []
         for row in iptoasn:
-            row[self._start_col] = int(row[self._start_col])
-            row[self._end_col] = int(row[self._end_col])
+            try:
+                row[self._start_col] = int(row[self._start_col])
+                row[self._end_col] = int(row[self._end_col])
+            except:
+                # must be addresses not ints
+                row[self._start_col] = self.ip2int(row[self._start_col])
+                row[self._end_col] = self.ip2int(row[self._end_col])
+
             self._data.append(row)
             self._left_keys.append(int(row[self._start_col]))
 
