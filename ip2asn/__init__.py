@@ -15,6 +15,7 @@ Usage:
     import ip2asn
     i2a = ip2asn.IP2ASN("ip2asn-v4-u32.tsv")
     result = i2a.lookup_address("93.184.216.34")
+    print(result)
 """
 
 import pyfsdb
@@ -31,12 +32,20 @@ class IP2ASN():
 
     def read_data(self):
         """Read data from the ip2asn file"""
-        iptoasn = pyfsdb.Fsdb(self._file)
+        if isinstance(self._file, str):
+            # assume a file name
+            iptoasn = pyfsdb.Fsdb(self._file)
+        else:
+            # assume it's a file handle instead
+            iptoasn = pyfsdb.Fsdb(file_handle = self._file)
+
+        # set the column names for pyfsdb
         iptoasn.column_names = ['start','end','ASN', 'country','name']
 
         (self._start_col, self._end_col,
          self._asn_col, self._country_col,
          self._name_col) = iptoasn.get_column_numbers(iptoasn.column_names)
+        print("here")
 
         # XXX: fsdb should do this for us
         self._data = []
@@ -47,10 +56,28 @@ class IP2ASN():
             self._data.append(row)
             self._left_keys.append(int(row[self._start_col]))
 
+    def ip2int(self, address, version=None):
+        """Converts an ascii represented IPv4 or IPv6 address into an
+           integer.  If the ipversion isn't specified (4 or 6), it
+           will attempt to guess based on whether the address has 
+           a ':' character in it"""
+        if version is None:
+            version = self._version
+        if self._version == 4:
+            ip = int(ipaddress.IPv4Address(address))
+        elif self._version == 6:
+            ip = int(ipaddress.IPv6Address(address))
+        else:
+            if address.find(":") != -1:
+                ip = int(ipaddress.IPv4Address(address))
+            else:
+                ip = int(ipaddress.IPv6Address(address))
+        return ip
+
     def lookup_address_row(self, address):
         """Look up an ip address from the ip2asn data, and return its row."""
         # get a numeric representation
-        ip = int(ipaddress.IPv4Address(address))
+        ip = self.ip2int(address)
 
         point = bisect(self._left_keys, ip)
         if point != len(self._left_keys):
@@ -63,7 +90,7 @@ class IP2ASN():
         dictionary of information about it.
         (transforming the row returned by lookup_address_row)"""
         results = self.lookup_address_row(address)
-        ip = int(ipaddress.IPv4Address(address))
+        ip = self.ip2int(address)
         return {
             'ip_text': address,
             'ip_numeric': ip,
