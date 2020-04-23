@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="ip2asn",
-    version="0.5.1",
+    version="0.9",
     author="Wes Hardaker",
     author_email="opensource@hardakers.net",
     description="A python class to quickly search ip2asn data for range matches",
