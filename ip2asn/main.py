@@ -6,6 +6,9 @@ import argparse
 import sys
 import os
 import ip2asn
+import pyfsdb
+
+COLUMN_NAMES = ['address', 'ip_numeric', 'ASN', 'owner', 'country', 'ip_range']
 
 def parse_args():
     """Handles argument parsing for the ip2asn script."""
@@ -24,7 +27,13 @@ def parse_args():
     parser.add_argument("-F", "--output-fsdb", action="store_true",
                         help="Output FSDB (tab-separated) formatted data")
 
-    parser.add_argument("addresses", type=str, nargs="+",
+    parser.add_argument("-I", "--input-fsdb", type=argparse.FileType("r"),
+                        help="Read an input FSDB and add columns to it; implies -F as well")
+    
+    parser.add_argument("-k", "--key", default="key", type=str,
+                        help="The input key of the FSDB input file that contains the ip address to analyze")
+
+    parser.add_argument("addresses", type=str, nargs="?",
                         help="Addresses to print information about")
 
     args = parser.parse_args()
@@ -47,18 +56,37 @@ def output_fsdb_row(outf, address, result):
                  result['owner'],
                  result['country'],
                  result['ip_range']])
+
+def process_fsdb(i2a, inh, outh, key):
+    inf = pyfsdb.Fsdb(file_handle = inh)
+    outf = pyfsdb.Fsdb(out_file_handle = outh)
+    outf.out_column_names = inf.column_names + COLUMN_NAMES[1:]
+
+    key_col = inf.get_column_number(key)
+    for row in inf:
+        result = i2a.lookup_address(row[key_col])
+        row.extend([result['ip_numeric'],
+                    result['ASN'],
+                    result['owner'],
+                    result['country'],
+                    result['ip_range']])
+        outf.append(row)
+        
                 
 def main():
     "The meat of the ip2asn script"
     args = parse_args()
 
-    if args.output_fsdb:
-        import pyfsdb
-        outf = pyfsdb.Fsdb(out_file_handle = args.output_file)
-        outf.out_column_names = ['address', 'ip_numeric', 'ASN',
-                                 'owner', 'country', 'ip_range']
-
     i2a = ip2asn.IP2ASN(args.ip2asn_database, ipversion=None)
+
+    if args.input_fsdb:
+        process_fsdb(i2a, args.input_fsdb, args.output_file, args.key)
+        exit()
+
+    if args.output_fsdb:
+        outf = pyfsdb.Fsdb(out_file_handle = args.output_file)
+        outf.out_column_names = COLUMN_NAMES
+
     for address in args.addresses:
         result = i2a.lookup_address(address)
         if not result:
