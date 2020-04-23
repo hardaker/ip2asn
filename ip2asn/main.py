@@ -23,7 +23,7 @@ def parse_args():
     args = parser.parse_args()
     return args
 
-def print_result(result):
+def print_result(address, result):
     """Displays the results to the output terminal/stdout"""
     print("Address: {}".format(address))
     print("  Numeric ip: {}".format(result['ip_numeric']))
@@ -43,7 +43,8 @@ def main():
         if not result:
             print("ERROR: address '%s' was not found in the database".format(address))
             continue
-        
+
+        print_result(address, result)
 
 if __name__ == "__main__":
     main()

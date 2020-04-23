@@ -15,6 +15,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     entry_points={
         'console_scripts': [
+            'ip2asn = ip2asn.main:main',
         ]
     },
     classifiers=[
