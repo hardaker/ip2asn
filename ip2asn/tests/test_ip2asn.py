@@ -42,4 +42,18 @@ class test_ip2asn(unittest.TestCase):
         print(result)
         self.assertTrue(isinstance(result, list), "properly returned a list")
 
-                        
+    def test_lookup_address(self):
+        import ip2asn
+        i2a = ip2asn.IP2ASN(self.get_first_20_rows())
+
+        result = i2a.lookup_address("1.1.1.1")
+        self.assertTrue(isinstance(result, dict), "properly returned a list")
+        self.assertEqual(result,
+                         {'ip_text': '1.1.1.1',
+                          'ip_numeric': 16843009,
+                          'ip_range': [16843008, 16843263],
+                          'ASN': '13335',
+                          'country': 'US',
+                          'owner': 'CLOUDFLARENET - Cloudflare, Inc.'},
+                         "Data returned matched expected")
+        
