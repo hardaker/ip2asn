@@ -65,11 +65,14 @@ def process_fsdb(i2a, inh, outh, key):
     key_col = inf.get_column_number(key)
     for row in inf:
         result = i2a.lookup_address(row[key_col])
-        row.extend([result['ip_numeric'],
-                    result['ASN'],
-                    result['owner'],
-                    result['country'],
-                    result['ip_range']])
+        if result:
+            row.extend([result['ip_numeric'],
+                        result['ASN'],
+                        result['owner'],
+                        result['country'],
+                        result['ip_range']])
+        else:
+            row.extend['-', '-', '-', '-', '-']
         outf.append(row)
         
                 
