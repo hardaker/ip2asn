@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="ip2asn",
-    version="0.5",
+    version="0.5.1",
     author="Wes Hardaker",
     author_email="opensource@hardakers.net",
     description="A python class to quickly search ip2asn data for range matches",
@@ -21,6 +21,8 @@ setuptools.setup(
     classifiers=[
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
+    ],
+    install_requires=['pyfsdb>=0.9.2',
     ],
     python_requires = '>=3.0',
     test_suite='nose.collector',
