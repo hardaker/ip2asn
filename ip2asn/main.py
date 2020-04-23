@@ -17,25 +17,46 @@ def parse_args():
                         default=os.environ['HOME'] + "/lib/ip2asn-v4-u32.tsv",
                         help="The ip2asn database file to use (download from iptoasn.com)")
 
+    parser.add_argument("-o", "--output-file", default=sys.stdout,
+                        type=argparse.FileType("w"),
+                        help="Output the results to this file")
+
+    parser.add_argument("-F", "--output-fsdb", action="store_true",
+                        help="Output FSDB (tab-separated) formatted data")
+
     parser.add_argument("addresses", type=str, nargs="+",
                         help="Addresses to print information about")
 
     args = parser.parse_args()
     return args
 
-def print_result(address, result):
+def print_result(to, address, result):
     """Displays the results to the output terminal/stdout"""
-    print("Address: {}".format(address))
-    print("  Numeric ip: {}".format(result['ip_numeric']))
-    print("         ASN: {}".format(result['ASN']))
-    print("       Owner: {}".format(result['owner']))
-    print("     Country: {}".format(result['country']))
-    print("    ip_range: {}".format(result['ip_range']))
-    print("")
+    to.write("Address: {}\n".format(address))
+    to.write("  Numeric ip: {}\n".format(result['ip_numeric']))
+    to.write("         ASN: {}\n".format(result['ASN']))
+    to.write("       Owner: {}\n".format(result['owner']))
+    to.write("     Country: {}\n".format(result['country']))
+    to.write("    ip_range: {}\n".format(result['ip_range']))
+    to.write("\n")
 
+def output_fsdb_row(outf, address, result):
+    outf.append([address, 
+                 result['ip_numeric'],
+                 result['ASN'],
+                 result['owner'],
+                 result['country'],
+                 result['ip_range']])
+                
 def main():
     "The meat of the ip2asn script"
     args = parse_args()
+
+    if args.output_fsdb:
+        import pyfsdb
+        outf = pyfsdb.Fsdb(out_file_handle = args.output_file)
+        outf.out_column_names = ['address', 'ip_numeric', 'ASN',
+                                 'owner', 'country', 'ip_range']
 
     i2a = ip2asn.IP2ASN(args.ip2asn_database, ipversion=None)
     for address in args.addresses:
@@ -44,7 +65,10 @@ def main():
             print("ERROR: address '%s' was not found in the database".format(address))
             continue
 
-        print_result(address, result)
+        if args.output_fsdb:
+            output_fsdb_row(outf, address, result)
+        else:
+            print_result(args.output_file, address, result)
 
 if __name__ == "__main__":
     main()
