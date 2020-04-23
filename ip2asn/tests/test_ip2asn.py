@@ -137,3 +137,20 @@ class test_ip2asn(unittest.TestCase):
                           'owner': 'WIDE-BB WIDE Project'},
                          "v6 Data returned matched expected")
         
+    def test_lookup_with_ipvunknown(self):
+        import ip2asn
+        i2a = ip2asn.IP2ASN(self.get_first_20_rows_v6(), ipversion=None)
+
+        result = i2a.lookup_address("2001:200::42")
+        self.assertTrue(isinstance(result, dict), "properly returned a dict")
+        print(result)
+        self.assertEqual(result,
+                         {'ip_text': '2001:200::42',
+                          'ip_numeric': 42540528726795050063891204319802818626,
+                          'ip_range': [42540528726795050063891204319802818560,
+                                       42540528728651960122819274732151504895],
+                          'ASN': '2500',
+                          'country': 'JP',
+                          'owner': 'WIDE-BB WIDE Project'},
+                         "v6 Data returned matched expected")
+        

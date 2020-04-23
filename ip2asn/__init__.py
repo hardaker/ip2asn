@@ -74,9 +74,9 @@ class IP2ASN():
             ip = int(ipaddress.IPv6Address(address))
         else:
             if address.find(":") != -1:
-                ip = int(ipaddress.IPv4Address(address))
-            else:
                 ip = int(ipaddress.IPv6Address(address))
+            else:
+                ip = int(ipaddress.IPv4Address(address))
         return ip
 
     def lookup_address_row(self, address):
