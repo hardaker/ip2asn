@@ -45,7 +45,6 @@ class IP2ASN():
         (self._start_col, self._end_col,
          self._asn_col, self._country_col,
          self._name_col) = iptoasn.get_column_numbers(iptoasn.column_names)
-        print("here")
 
         # XXX: fsdb should do this for us
         self._data = []
