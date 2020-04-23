@@ -72,7 +72,7 @@ def process_fsdb(i2a, inh, outh, key):
                         result['country'],
                         result['ip_range']])
         else:
-            row.extend['-', '-', '-', '-', '-']
+            row.extend(['-', '-', '-', '-', '-'])
         outf.append(row)
         
                 

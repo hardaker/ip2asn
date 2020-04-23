@@ -95,6 +95,8 @@ class IP2ASN():
         dictionary of information about it.
         (transforming the row returned by lookup_address_row)"""
         results = self.lookup_address_row(address)
+        if not results:
+            return results
         ip = self.ip2int(address)
         return {
             'ip_text': address,
