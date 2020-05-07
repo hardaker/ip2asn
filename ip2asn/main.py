@@ -33,7 +33,7 @@ def parse_args():
     parser.add_argument("-k", "--key", default="key", type=str,
                         help="The input key of the FSDB input file that contains the ip address to analyze")
 
-    parser.add_argument("addresses", type=str, nargs="?",
+    parser.add_argument("addresses", type=str, nargs="*",
                         help="Addresses to print information about")
 
     args = parser.parse_args()
