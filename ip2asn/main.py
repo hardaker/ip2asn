@@ -17,7 +17,7 @@ def parse_args():
                                      epilog="""Example Usage: ip2asn -f ip2asn-v4-43.tsv 1.1.1.1""")
 
     parser.add_argument("-f", "--ip2asn-database", type=str,
-                        default=os.environ['HOME'] + "/lib/ip2asn-v4-u32.tsv",
+                        default=os.environ['HOME'] + "/lib/ip2asn-combined.tsv",
                         help="The ip2asn database file to use (download from iptoasn.com)")
 
     parser.add_argument("-o", "--output-file", default=sys.stdout,
