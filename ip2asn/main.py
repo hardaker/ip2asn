@@ -93,7 +93,7 @@ def main():
     for address in args.addresses:
         result = i2a.lookup_address(address)
         if not result:
-            print("ERROR: address '%s' was not found in the database".format(address))
+            print("ERROR: address '{}' was not found in the database".format(address))
             continue
 
         if args.output_fsdb:
