@@ -115,7 +115,6 @@ def main():
     i2a = ip2asn.IP2ASN(args.ip2asn_database, ipversion=None)
 
     if args.input_fsdb:
-        import pdb ; pdb.set_trace()
         process_fsdb(i2a, args.input_fsdb, args.output_file,
                      args.key, by_asn=args.search_by_asn)
         exit()

@@ -1,11 +1,11 @@
 it:
 	python3 setup.py build
 
-package:
+package: 
 	rm -rf dist
 	python3 setup.py sdist bdist_wheel
 
-publish:
+publish: package
 	python3 -m twine upload -u hardaker dist/*
 
 install:
