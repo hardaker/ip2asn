@@ -79,9 +79,9 @@ def process_fsdb(i2a, inh, outh, key, by_asn=False):
     inf = pyfsdb.Fsdb(file_handle = inh)
     outf = pyfsdb.Fsdb(out_file_handle = outh)
     if by_asn:
-        outf.out_column_names = inf.column_names + COLUMN_NAMES[1:]
-    else:
         outf.out_column_names = inf.column_names + ASN_COLUMN_NAMES[1:]
+    else:
+        outf.out_column_names = inf.column_names + COLUMN_NAMES[1:]
 
     key_col = inf.get_column_number(key)
     for row in inf:
@@ -115,8 +115,9 @@ def main():
     i2a = ip2asn.IP2ASN(args.ip2asn_database, ipversion=None)
 
     if args.input_fsdb:
+        import pdb ; pdb.set_trace()
         process_fsdb(i2a, args.input_fsdb, args.output_file,
-                     args.key, args.search_by_asn)
+                     args.key, by_asn=args.search_by_asn)
         exit()
 
     if args.output_fsdb:
