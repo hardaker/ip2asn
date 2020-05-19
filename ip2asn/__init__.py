@@ -107,6 +107,29 @@ class IP2ASN():
             'owner': results[self._name_col],
         }
 
+    def lookup_asn(self, asn, limit=None):
+        """Lookups all the entries in the database containing a
+        particular ASN"""
+
+        asn = str(asn) # turn an into back to a string
+
+        results = []
+        for record in self._data:
+            if record[self._asn_col] == asn:
+                results.append(
+                    {
+                        'ip_range': [record[self._start_col],
+                                     record[self._end_col]],
+                        'ASN': record[self._asn_col],
+                        'country': record[self._country_col],
+                        'owner': record[self._name_col],
+                    }
+                )
+                if limit and len(results) == limit:
+                    return results
+
+        return results
+
 def testmain():
     import os
     t = IP2ASN(os.environ['HOME'] + "/lib/ip2asn-v4-u32.tsv")

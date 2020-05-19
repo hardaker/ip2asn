@@ -20,6 +20,12 @@ def parse_args():
                         default=os.environ['HOME'] + "/lib/ip2asn-combined.tsv",
                         help="The ip2asn database file to use (download from iptoasn.com)")
 
+    parser.add_argument("-a", "--search-by-asn", action="store_true",
+                        help="Instead of searching by IP address, search by an ASN number instead and return all records for that ASN number")
+
+    parser.add_argument("-A", "--asn-limit", type=int, default=0,
+                        help="Search by ASN, but limit the results to this number -- implies -a")
+
     parser.add_argument("-o", "--output-file", default=sys.stdout,
                         type=argparse.FileType("w"),
                         help="Output the results to this file")
@@ -37,12 +43,17 @@ def parse_args():
                         help="Addresses to print information about")
 
     args = parser.parse_args()
+
+    if args.asn_limit > 0:
+        args.search_by_asn = True
+        
     return args
 
 def print_result(to, address, result):
     """Displays the results to the output terminal/stdout"""
-    to.write("Address: {}\n".format(address))
-    to.write("  Numeric ip: {}\n".format(result['ip_numeric']))
+    if 'ip_numeric' in result:
+        to.write("Address: {}\n".format(address))
+        to.write("  Numeric ip: {}\n".format(result['ip_numeric']))
     to.write("         ASN: {}\n".format(result['ASN']))
     to.write("       Owner: {}\n".format(result['owner']))
     to.write("     Country: {}\n".format(result['country']))
@@ -91,15 +102,22 @@ def main():
         outf.out_column_names = COLUMN_NAMES
 
     for address in args.addresses:
-        result = i2a.lookup_address(address)
-        if not result:
-            print("ERROR: address '{}' was not found in the database".format(address))
-            continue
-
-        if args.output_fsdb:
-            output_fsdb_row(outf, address, result)
+        if args.search_by_asn:
+            results = i2a.lookup_asn(address, limit=args.asn_limit)
         else:
-            print_result(args.output_file, address, result)
+            result = i2a.lookup_address(address)
+
+            if not result:
+                print("ERROR: address '{}' was not found in the database".format(address))
+                continue
+
+            results = [result]
+
+        for result in results:
+            if args.output_fsdb:
+                output_fsdb_row(outf, address, result)
+            else:
+                print_result(args.output_file, address, result)
 
 if __name__ == "__main__":
     main()
