@@ -9,6 +9,7 @@ import ip2asn
 import pyfsdb
 
 COLUMN_NAMES = ['address', 'ip_numeric', 'ASN', 'owner', 'country', 'ip_range']
+ASN_COLUMN_NAMES = ['ASN', 'owner', 'country', 'ip_range']
 
 def parse_args():
     """Handles argument parsing for the ip2asn script."""
@@ -61,12 +62,18 @@ def print_result(to, address, result):
     to.write("\n")
 
 def output_fsdb_row(outf, address, result):
-    outf.append([address, 
-                 result['ip_numeric'],
-                 result['ASN'],
-                 result['owner'],
-                 result['country'],
-                 result['ip_range']])
+    if 'ip_numeric' in result:
+        outf.append([address, 
+                     result['ip_numeric'],
+                     result['ASN'],
+                     result['owner'],
+                     result['country'],
+                     result['ip_range']])
+    else:
+        outf.append([result['ASN'],
+                     result['owner'],
+                     result['country'],
+                     result['ip_range']])
 
 def process_fsdb(i2a, inh, outh, key):
     inf = pyfsdb.Fsdb(file_handle = inh)
@@ -99,7 +106,10 @@ def main():
 
     if args.output_fsdb:
         outf = pyfsdb.Fsdb(out_file_handle = args.output_file)
-        outf.out_column_names = COLUMN_NAMES
+        if args.search_by_asn:
+            outf.out_column_names = ASN_COLUMN_NAMES
+        else:
+            outf.out_column_names = COLUMN_NAMES
 
     for address in args.addresses:
         if args.search_by_asn:
