@@ -75,22 +75,36 @@ def output_fsdb_row(outf, address, result):
                      result['country'],
                      result['ip_range']])
 
-def process_fsdb(i2a, inh, outh, key):
+def process_fsdb(i2a, inh, outh, key, by_asn=False):
     inf = pyfsdb.Fsdb(file_handle = inh)
     outf = pyfsdb.Fsdb(out_file_handle = outh)
-    outf.out_column_names = inf.column_names + COLUMN_NAMES[1:]
+    if by_asn:
+        outf.out_column_names = inf.column_names + COLUMN_NAMES[1:]
+    else:
+        outf.out_column_names = inf.column_names + ASN_COLUMN_NAMES[1:]
 
     key_col = inf.get_column_number(key)
     for row in inf:
-        result = i2a.lookup_address(row[key_col])
-        if result:
-            row.extend([result['ip_numeric'],
-                        result['ASN'],
-                        result['owner'],
-                        result['country'],
-                        result['ip_range']])
+        if by_asn:
+            results = i2a.lookup_asn(row[key_col], limit=1)
+            if len(results) == 0:
+                row.extend(['-', '-', '-', '-', '-'])
+            else:
+                row.extend([results[0]['owner'],
+                            results[0]['country'],
+                            results[0]['ip_range']])
+
         else:
-            row.extend(['-', '-', '-', '-', '-'])
+            result = i2a.lookup_address(row[key_col])
+                
+            if result:
+                row.extend([result['ip_numeric'],
+                            result['ASN'],
+                            result['owner'],
+                            result['country'],
+                            result['ip_range']])
+            else:
+                row.extend(['-', '-', '-', '-', '-'])
         outf.append(row)
         
                 
@@ -101,7 +115,8 @@ def main():
     i2a = ip2asn.IP2ASN(args.ip2asn_database, ipversion=None)
 
     if args.input_fsdb:
-        process_fsdb(i2a, args.input_fsdb, args.output_file, args.key)
+        process_fsdb(i2a, args.input_fsdb, args.output_file,
+                     args.key, args.search_by_asn)
         exit()
 
     if args.output_fsdb:
