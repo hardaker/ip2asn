@@ -19,6 +19,8 @@ Usage:
     print(result)
 """
 
+__VERSION__ = "1.2.3"
+
 import pyfsdb
 import ipaddress
 from logging import error
