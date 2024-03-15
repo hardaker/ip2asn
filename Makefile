@@ -1,12 +1,18 @@
-it:
-	python3 setup.py build
+all: package
+	hatch build
 
-package: 
+testit:
+	PYTHONPATH=. pytest-3
+
+package: testit packageforce
+
+packageforce:
 	rm -rf dist
-	python3 setup.py sdist bdist_wheel
+	hatch build
 
-publish: package
-	python3 -m twine upload -u hardaker dist/*
+publish:
+	hatch publish -u __token__
+        # python3 -m twine upload -u __token__ dist/*
 
 install:
 	python3 setup.py install
