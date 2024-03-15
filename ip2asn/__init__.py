@@ -19,7 +19,7 @@ Usage:
     print(result)
 """
 
-__VERSION__ = "1.2.3"
+__VERSION__ = "1.3"
 
 import pyfsdb
 import ipaddress
