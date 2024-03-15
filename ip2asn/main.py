@@ -7,6 +7,9 @@ import sys
 import os
 import ip2asn
 import pyfsdb
+import logging
+from logging import info, error
+from pathlib import Path
 
 COLUMN_NAMES = ['address', 'ip_numeric', 'ASN', 'owner', 'country', 'ip_range']
 ASN_COLUMN_NAMES = ['ASN', 'owner', 'country', 'ip_range']
@@ -40,6 +43,13 @@ def parse_args():
     parser.add_argument("-k", "--key", default="key", type=str,
                         help="The input key of the FSDB input file that contains the ip address to analyze")
 
+    parser.add_argument(
+        "--log-level",
+        "--ll",
+        default="info",
+        help="Define the logging verbosity level (debug, info, warning, error, fotal, critical).",
+    )
+    
     parser.add_argument("addresses", type=str, nargs="*",
                         help="Addresses to print information about")
 
@@ -47,6 +57,9 @@ def parse_args():
 
     if args.asn_limit > 0:
         args.search_by_asn = True
+        
+    log_level = args.log_level.upper()
+    logging.basicConfig(level=log_level, format="%(levelname)-10s:\t%(message)s")
         
     return args
 
@@ -112,7 +125,17 @@ def main():
     "The meat of the ip2asn script"
     args = parse_args()
 
-    i2a = ip2asn.IP2ASN(args.ip2asn_database, ipversion=None)
+    if Path(args.ip2asn_database).exists():
+        database = args.ip2asn_database
+    elif Path("ip2asn-combined.tsv").exists():
+        info("using ./ip2asn-combined.tsv")
+        database = "ip2asn-combined.tsv"
+    else:
+        error("Cannot find the ip2asn-combined.tsv or other similar database file")
+        error("Please specify a location with -f or download from ip2asn.com")
+        sys.exit(1)
+
+    i2a = ip2asn.IP2ASN(database, ipversion=None)
 
     if args.input_fsdb:
         process_fsdb(i2a, args.input_fsdb, args.output_file,
