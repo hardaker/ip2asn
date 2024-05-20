@@ -6,27 +6,40 @@ information about an address.
 Usage:
     Prep:
 
-    curl -o ip2asn-v4-u32.tsv.gz https://iptoasn.com/data/ip2asn-v4-u32.tsv.gz
-    gunzip ip2asn-v4-u32.tsv.gz
+    curl -o ip2asn-combined.tsv.gz https://iptoasn.com/data/ip2asn-combined.tsv.gz
+    gunzip ip2asn-combined.tsv.gz
     pip3 install ip2asn
 
     Code:
 
     import ip2asn
-    i2a = ip2asn.IP2ASN("ip2asn-v4-u32.tsv")
+    i2a = ip2asn.IP2ASN("ip2asn-combined.tsv")
     result = i2a.lookup_address("93.184.216.34")
+    result = i2a.lookup_address("2606:2800:220:1:248:1893:25c8:1946")
     print(result)
 """
 
+<<<<<<< HEAD
 import os
 import pyfsdb
 import ipaddress
 import msgpack
+=======
+__VERSION__ = "1.3.1"
+
+import pyfsdb
+import ipaddress
+from logging import error
+>>>>>>> a6beb885f627f735ebc605f07362cb0f70f45130
 from bisect import bisect
 
 class IP2ASN():
     """A container for accessing data within an ip2asn file"""
+<<<<<<< HEAD
     def __init__(self, ip2asn_file, ipversion=4, cache_contents: bool = False):
+=======
+    def __init__(self, ip2asn_file, ipversion=None):
+>>>>>>> a6beb885f627f735ebc605f07362cb0f70f45130
         self._file = ip2asn_file
         self._version = ipversion
 
@@ -101,8 +114,12 @@ class IP2ASN():
                 row[self._end_col] = int(row[self._end_col])
             except Exception:
                 # must be addresses not ints
-                row[self._start_col] = self.ip2int(row[self._start_col])
-                row[self._end_col] = self.ip2int(row[self._end_col])
+                try:
+                    row[self._start_col] = self.ip2int(row[self._start_col])
+                    row[self._end_col] = self.ip2int(row[self._end_col])
+                except Exception:
+                    error(f"failed to parse {row}")
+                    continue
 
             self._data.append(row)
             self._left_keys.append(int(row[self._start_col]))
@@ -113,7 +130,14 @@ class IP2ASN():
            will attempt to guess based on whether the address has 
            a ':' character in it"""
         if version is None:
-            version = self._version
+            if self._version:
+                verison = self._version
+            elif ":" in address:
+                version = 6
+            elif "." in address:
+                version = 4
+            else:
+                raise ValueError(f"unknown address type: {address}")
         if self._version == 4:
             ip = int(ipaddress.IPv4Address(address))
         elif self._version == 6:
