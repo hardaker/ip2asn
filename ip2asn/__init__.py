@@ -18,20 +18,66 @@ Usage:
     print(result)
 """
 
+import os
 import pyfsdb
 import ipaddress
+import msgpack
 from bisect import bisect
 
 class IP2ASN():
     """A container for accessing data within an ip2asn file"""
-    def __init__(self, ip2asn_file, ipversion=4):
+    def __init__(self, ip2asn_file, ipversion=4, cache_contents: bool = False):
         self._file = ip2asn_file
         self._version = ipversion
 
-        self.read_data()
+        self._msgpack_extension = ".msgpack"
 
-    def read_data(self):
-        """Read data from the ip2asn file"""
+        self.read_data()
+        if cache_contents:
+            self.save_msgpack_file()
+
+    def read_msgpack_file(self) -> bool:
+        """Read a msgpack compressed version of the database if available."""
+        msgpack_filename = self._file + self._msgpack_extension
+        if not os.path.exists(msgpack_filename):
+            return False
+
+        contents = msgpack.load(open(msgpack_filename, 'rb'))
+        self._data = contents['data']
+        self._left_keys = contents['left_keys']
+        self._start_col = contents["start_col"] 
+        self._end_col = contents["end_col"] 
+        self._asn_col = contents["asn_col"] 
+        self._country_col = contents["country_col"] 
+        self._name_col = contents["name_col"] 
+
+        return True
+
+    def save_msgpack_file(self) -> None:
+        """Save the stored data into a msgpack file."""
+        if isinstance(self._file, str):
+            msgpack_filename = self._file + self._msgpack_extension
+        else:
+            msgpack_filename = self._file.name + self._msgpack_extension
+
+        contents = {
+            "version": 1,
+            "data": self._data,
+            "left_keys": self._left_keys,
+            "start_col": self._start_col,
+            "end_col": self._end_col,
+            "asn_col": self._asn_col,
+            "country_col": self._country_col,
+            "name_col": self._name_col,
+        }
+        msgpack.pack(contents, open(msgpack_filename, "wb"))
+
+    def read_data(self) -> None:
+        """Read data from the ip2asn file."""
+
+        if self.read_msgpack_file():
+            return
+
         if isinstance(self._file, str):
             # assume a file name
             iptoasn = pyfsdb.Fsdb(self._file)
@@ -53,7 +99,7 @@ class IP2ASN():
             try:
                 row[self._start_col] = int(row[self._start_col])
                 row[self._end_col] = int(row[self._end_col])
-            except:
+            except Exception:
                 # must be addresses not ints
                 row[self._start_col] = self.ip2int(row[self._start_col])
                 row[self._end_col] = self.ip2int(row[self._end_col])

@@ -41,6 +41,9 @@ def parse_args():
     parser.add_argument("-k", "--key", default="key", type=str,
                         help="The input key of the FSDB input file that contains the ip address to analyze")
 
+    parser.add_argument("-C", "--cache-database", action="store_true",
+                        help="After loading the ip2asn file, cache it in a msgpack file for faster loading next time.")
+
     parser.add_argument("addresses", type=str, nargs="*",
                         help="Addresses to print information about")
 
@@ -115,7 +118,8 @@ def main():
     "The meat of the ip2asn script"
     args = parse_args()
 
-    i2a = ip2asn.IP2ASN(args.ip2asn_database, ipversion=None)
+    i2a = ip2asn.IP2ASN(args.ip2asn_database, ipversion=None,
+                        cache_contents=args.cache_database)
 
     if args.input_fsdb:
         process_fsdb(i2a, args.input_fsdb, args.output_file,
