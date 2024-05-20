@@ -19,27 +19,21 @@ Usage:
     print(result)
 """
 
-<<<<<<< HEAD
 import os
 import pyfsdb
 import ipaddress
 import msgpack
-=======
+
 __VERSION__ = "1.3.1"
 
 import pyfsdb
 import ipaddress
 from logging import error
->>>>>>> a6beb885f627f735ebc605f07362cb0f70f45130
 from bisect import bisect
 
 class IP2ASN():
     """A container for accessing data within an ip2asn file"""
-<<<<<<< HEAD
-    def __init__(self, ip2asn_file, ipversion=4, cache_contents: bool = False):
-=======
-    def __init__(self, ip2asn_file, ipversion=None):
->>>>>>> a6beb885f627f735ebc605f07362cb0f70f45130
+    def __init__(self, ip2asn_file, ipversion=None, cache_contents: bool = False):
         self._file = ip2asn_file
         self._version = ipversion
 
