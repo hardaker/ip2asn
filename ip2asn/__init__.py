@@ -27,8 +27,7 @@ import io
 
 __VERSION__ = "1.3.1"
 
-import pyfsdb
-import ipaddress
+from typing import List
 from logging import error
 from bisect import bisect
 
@@ -40,9 +39,8 @@ class IP2ASN():
 
         self._msgpack_extension = ".msgpack"
 
-        self.read_data()
-        if cache_contents:
-            self.save_msgpack_file()
+        # TODO(hardaker): this probably shouldn't be forced called in init()
+        self.read_data(cache_contents)
 
     @property
     def file_name(self):
@@ -52,6 +50,11 @@ class IP2ASN():
             return "BOGUSFILE"
         else:
             return self._file.name
+
+    def read_data(self, cache_contents: bool = False):
+        self.read_data_internal()
+        if cache_contents:
+            self.save_msgpack_file()
 
     def read_msgpack_file(self) -> bool:
         """Read a msgpack compressed version of the database if available."""
@@ -70,17 +73,57 @@ class IP2ASN():
 
         return True
 
+    def save_large_numbers32(self, dataset: List[int]) -> List[int | List[int]]:
+        transformmed = []
+        for item in dataset:
+            if (item >= 2**32):
+                transformmed.append([
+                    (item & 0xffffffff000000000000000000000000) >> 12*8,
+                    (item & 0xffffffff0000000000000000) >> 8*8,
+                    (item & 0xffffffff00000000) >> 4*8,
+                    (item & 0xffffffff),
+                ])
+            else:
+                transformmed.append(item)
+        return transformmed
+
+    def load_large_numbers32(self, dataset: List[int | List[int]]) -> List[int]:
+        transformmed = []
+        for item in dataset:
+            if isinstance(item, list):
+                item = (item[0] << 12*8) + (item[1] << 8*8) + (item[2] << 4*8) + (item[3])
+            transformmed.append(item)
+        return transformmed
+        
+    def save_large_numbers64(self, dataset: List[int]) -> List[int | List[int]]:
+        transformmed = []
+        for item in dataset:
+            if (item >= 2**64):
+                transformmed.append([
+                    (item & 0xffffffffffffffff0000000000000000) >> 8*8,
+                    (item & 0xffffffffffffffff),
+                ])
+            else:
+                transformmed.append(item)
+        return transformmed
+
+    def load_large_numbers64(self, dataset: List[int | List[int]]) -> List[int]:
+        transformmed = []
+        for item in dataset:
+            if isinstance(item, list):
+                item = (item[0] << 8*8) + (item[1])
+            transformmed.append(item)
+        return transformmed
+
     def save_msgpack_file(self) -> None:
         """Save the stored data into a msgpack file."""
-        if isinstance(self._file, str):
-            msgpack_filename = self._file + self._msgpack_extension
-        else:
-            msgpack_filename = self._file.name + self._msgpack_extension
+        
+        msgpack_filename = self.file_name + self._msgpack_extension
 
         contents = {
             "version": 1,
-            "data": self._data,
-            "left_keys": self._left_keys,
+            "data": self.save_large_numbers(self._data),
+            "left_keys": self.save_large_numbers(self._left_keys),
             "start_col": self._start_col,
             "end_col": self._end_col,
             "asn_col": self._asn_col,
@@ -89,7 +132,7 @@ class IP2ASN():
         }
         msgpack.pack(contents, open(msgpack_filename, "wb"))
 
-    def read_data(self) -> None:
+    def read_data_internal(self) -> None:
         """Read data from the ip2asn file."""
 
         if self.read_msgpack_file():
@@ -142,9 +185,9 @@ class IP2ASN():
                 version = 4
             else:
                 raise ValueError(f"unknown address type: {address}")
-        if self._version == 4:
+        if version == 4:
             ip = int(ipaddress.IPv4Address(address))
-        elif self._version == 6:
+        elif version == 6:
             ip = int(ipaddress.IPv6Address(address))
         else:
             if address.find(":") != -1:
