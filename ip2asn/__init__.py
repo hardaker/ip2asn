@@ -23,6 +23,7 @@ import os
 import pyfsdb
 import ipaddress
 import msgpack
+import io
 
 __VERSION__ = "1.3.1"
 
@@ -43,9 +44,18 @@ class IP2ASN():
         if cache_contents:
             self.save_msgpack_file()
 
+    @property
+    def file_name(self):
+        if isinstance(self._file, str):
+            return self._file
+        elif isinstance(self._file, io.StringIO):
+            return "BOGUSFILE"
+        else:
+            return self._file.name
+
     def read_msgpack_file(self) -> bool:
         """Read a msgpack compressed version of the database if available."""
-        msgpack_filename = self._file + self._msgpack_extension
+        msgpack_filename = self.file_name + self._msgpack_extension
         if not os.path.exists(msgpack_filename):
             return False
 
