@@ -24,6 +24,7 @@ import pyfsdb
 import ipaddress
 import msgpack
 import io
+from copy import deepcopy
 
 __VERSION__ = "1.3.1"
 
@@ -56,23 +57,6 @@ class IP2ASN():
         if cache_contents:
             self.save_msgpack_file()
 
-    def read_msgpack_file(self) -> bool:
-        """Read a msgpack compressed version of the database if available."""
-        msgpack_filename = self.file_name + self._msgpack_extension
-        if not os.path.exists(msgpack_filename):
-            return False
-
-        contents = msgpack.load(open(msgpack_filename, 'rb'))
-        self._data = contents['data']
-        self._left_keys = contents['left_keys']
-        self._start_col = contents["start_col"] 
-        self._end_col = contents["end_col"] 
-        self._asn_col = contents["asn_col"] 
-        self._country_col = contents["country_col"] 
-        self._name_col = contents["name_col"] 
-
-        return True
-
     def save_large_numbers32(self, dataset: List[int]) -> List[int | List[int]]:
         transformmed = []
         for item in dataset:
@@ -96,6 +80,7 @@ class IP2ASN():
         return transformmed
         
     def save_large_numbers64(self, dataset: List[int]) -> List[int | List[int]]:
+        """Convert a list of up to 128 bit integers and return an encoded list of 64 bit integers."""
         transformmed = []
         for item in dataset:
             if (item >= 2**64):
@@ -108,12 +93,56 @@ class IP2ASN():
         return transformmed
 
     def load_large_numbers64(self, dataset: List[int | List[int]]) -> List[int]:
+        """Convert a list of encoded 64 bit integers into an original list of up to 128 bit integers."""
         transformmed = []
         for item in dataset:
             if isinstance(item, list):
                 item = (item[0] << 8*8) + (item[1])
             transformmed.append(item)
         return transformmed
+
+    def save_data_numbers64(self, dataset: List[int]) -> List[int | List[int]]:
+        transformmed = deepcopy(dataset)
+        for item in transformmed:
+            if (item[0] >= 2**64):
+                item[0] = [
+                    (item[0] & 0xffffffffffffffff0000000000000000) >> 8*8,
+                    (item[0] & 0xffffffffffffffff),
+                ]
+            if (item[1] >= 2**64):
+                item[1] = [
+                    (item[1] & 0xffffffffffffffff0000000000000000) >> 8*8,
+                    (item[1] & 0xffffffffffffffff),
+                ]
+        return transformmed
+
+    def load_data_numbers64(self, dataset: List[int | List[int]]) -> List[int]:
+        """Convert a list of encoded 64 bit integers into an original list of up to 128 bit integers."""
+        transformmed = []
+        for item in dataset:
+            if isinstance(item[0], list):
+                item[0] = (item[0][0] << 8*8) + (item[0][1])
+            if isinstance(item[1], list):
+                item[1] = (item[1][0] << 8*8) + (item[1][1])
+            transformmed.append(item)
+        return transformmed
+
+    def read_msgpack_file(self) -> bool:
+        """Read a msgpack compressed version of the database if available."""
+        msgpack_filename = self.file_name + self._msgpack_extension
+        if not os.path.exists(msgpack_filename):
+            return False
+
+        contents = msgpack.load(open(msgpack_filename, 'rb'))
+        self._data = self.load_data_numbers64(contents['data'])
+        self._left_keys = self.load_large_numbers64(contents['left_keys'])
+        self._start_col = contents["start_col"] 
+        self._end_col = contents["end_col"] 
+        self._asn_col = contents["asn_col"] 
+        self._country_col = contents["country_col"] 
+        self._name_col = contents["name_col"] 
+
+        return True
 
     def save_msgpack_file(self) -> None:
         """Save the stored data into a msgpack file."""
@@ -122,8 +151,8 @@ class IP2ASN():
 
         contents = {
             "version": 1,
-            "data": self.save_large_numbers(self._data),
-            "left_keys": self.save_large_numbers(self._left_keys),
+            "data": self.save_data_numbers64(self._data),
+            "left_keys": self.save_large_numbers64(self._left_keys),
             "start_col": self._start_col,
             "end_col": self._end_col,
             "asn_col": self._asn_col,
