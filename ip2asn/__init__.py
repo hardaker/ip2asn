@@ -29,7 +29,7 @@ from copy import deepcopy
 __VERSION__ = "1.3.1"
 
 from typing import List
-from logging import error
+from logging import error, warning
 from bisect import bisect
 
 class IP2ASN():
@@ -134,6 +134,10 @@ class IP2ASN():
             return False
 
         contents = msgpack.load(open(msgpack_filename, 'rb'))
+
+        if contents["version"] != __VERSION__:
+            warning(f"This ip2asn cache file was created with an older version ({contents['version']}) -- things may break.")
+
         self._data = self.load_data_numbers64(contents['data'])
         self._left_keys = self.load_large_numbers64(contents['left_keys'])
         self._start_col = contents["start_col"] 
@@ -150,7 +154,7 @@ class IP2ASN():
         msgpack_filename = self.file_name + self._msgpack_extension
 
         contents = {
-            "version": 1,
+            "version": __VERSION__,
             "data": self.save_data_numbers64(self._data),
             "left_keys": self.save_large_numbers64(self._left_keys),
             "start_col": self._start_col,
