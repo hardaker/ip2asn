@@ -39,12 +39,12 @@ def parse_args():
     parser.add_argument("-F", "--output-fsdb", action="store_true",
                         help="Output FSDB (tab-separated) formatted data")
 
-    parser.add_argument("-I", "--input-fsdb", type=argparse.FileType("r"),
-                        help="Read an input FSDB and add columns to it; implies -F as well")
-    
     parser.add_argument("-T", "--output-pcap-filter", action="store_true",
                         help="Output the results as a libpcap / tcpdump filter expression")
 
+    parser.add_argument("-I", "--input-fsdb", type=argparse.FileType("r"),
+                        help="Read an input FSDB and add columns to it; implies -F as well")
+    
     parser.add_argument("-k", "--key", default="key", type=str,
                         help="The input key of the FSDB input file that contains the ip address to analyze")
 
