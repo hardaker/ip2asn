@@ -6,19 +6,10 @@ A python class to search [ip2asn] information for matches.
 
 # Installation
 
-Using pip:
+Using pip or pipx:
 
 ```
-pip3 install ip2asn
-```
-
-Or manually:
-
-```
-git clone git@github.com:hardaker/ip2asn.git
-cd ip2asn
-python3 setup.py build
-python3 setup.py install
+pipx install ip2asn
 ```
 
 # Example Usage
@@ -65,6 +56,13 @@ Address: 8.8.8.8
        Owner: GOOGLE - Google LLC
 ...
 (google has a lot of registrations)
+```
+
+### Displaying a tcpdump / libpcap filter given a address or ASN
+
+``` sh
+# ip2asn -T -a 15169
+( net 8.8.4.0/24 or net 8.8.8.0/24 or net 8.35.200.0/21 or ....
 ```
 
 ## Coding
