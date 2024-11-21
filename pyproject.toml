@@ -18,6 +18,7 @@ classifiers = [
 ]
 dependencies = [
     "pyfsdb",
+    "msgpack",
 ]
 
 [project.scripts]
