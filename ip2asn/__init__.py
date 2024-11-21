@@ -26,7 +26,7 @@ import msgpack
 import io
 from copy import deepcopy
 
-__VERSION__ = "1.4"
+__VERSION__ = "1.5"
 
 from typing import List
 from logging import error, warning
