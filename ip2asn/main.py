@@ -8,6 +8,7 @@ import os
 import ip2asn
 import pyfsdb
 import logging
+import ipaddress
 from logging import info, error
 from pathlib import Path
 
@@ -41,6 +42,9 @@ def parse_args():
     parser.add_argument("-I", "--input-fsdb", type=argparse.FileType("r"),
                         help="Read an input FSDB and add columns to it; implies -F as well")
     
+    parser.add_argument("-T", "--output-pcap-filter", action="store_true",
+                        help="Output the results as a libpcap / tcpdump filter expression")
+
     parser.add_argument("-k", "--key", default="key", type=str,
                         help="The input key of the FSDB input file that contains the ip address to analyze")
 
@@ -94,6 +98,24 @@ def output_fsdb_row(outf, address, result):
                      result['owner'],
                      result['country'],
                      result['ip_range']])
+
+def output_pcap_filter(results: list) -> None:
+    sys.stdout.write("( ")
+    expressions = []
+    for result in results:
+        (left, right) = result['ip_range']
+        if left <= 2**33:
+            left = ipaddress.IPv4Address(left)
+            right = ipaddress.IPv4Address(right)
+        else:
+            left = ipaddress.IPv6Address(left)
+            right = ipaddress.IPv6Address(right)
+        ranges = ipaddress.summarize_address_range(left, right)
+        for range in ranges:
+            expressions.append(f"net {range}")
+
+    sys.stdout.write(" or ".join(expressions))
+    print(" )")
 
 def process_fsdb(i2a, inh, outh, key, by_asn=False):
     inf = pyfsdb.Fsdb(file_handle = inh)
@@ -169,11 +191,14 @@ def main():
 
             results = [result]
 
-        for result in results:
-            if args.output_fsdb:
-                output_fsdb_row(outf, address, result)
-            else:
-                print_result(args.output_file, address, result)
+        if args.output_pcap_filter:
+            output_pcap_filter(results)
+        else:
+            for result in results:
+                if args.output_fsdb:
+                    output_fsdb_row(outf, address, result)
+                else:
+                    print_result(args.output_file, address, result)
 
 if __name__ == "__main__":
     main()
