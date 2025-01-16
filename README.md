@@ -17,9 +17,7 @@ pipx install ip2asn
 ## setup
 
 ``` sh
-curl -o ip2asn-v4-u32.tsv.gz https://iptoasn.com/data/ip2asn-v4-u32.tsv.gz
-gunzip ip2asn-v4-u32.tsv.gz
-
+ip2asn -f ip2asn.db --fetch
 ```
 
 ## command line
