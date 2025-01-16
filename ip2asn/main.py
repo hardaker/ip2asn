@@ -165,8 +165,10 @@ def get_ip2asn_db_path(args, exit_on_error: bool = True):
         info("using ./ip2asn-combined.tsv")
         database = "ip2asn-combined.tsv"
     elif exit_on_error:
-        error("Cannot find the ip2asn-combined.tsv or other similar database file")
-        error("Please specify a location with -f or download from ip2asn.com")
+        error("Cannot find the ip2asn-combined.tsv or other similar database file.")
+        error("Please specify a location with -f or download from ip2asn.com.")
+        error("Run with --fetch to download a copy using this tool.")
+        error(f"Default storage location: {database}")
         sys.exit(1)
 
     return database
