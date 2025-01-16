@@ -7,7 +7,7 @@ name = "ip2asn"
 dynamic = ["version"]
 description = "A tool for doing differential analysis of pcap files"
 readme = "README.md"
-license = "MIT"
+# license = "MIT"
 requires-python = ">=3.7"
 authors = [
     { name = "Wes Hardaker", email = "opensource@hardakers.net" },
@@ -15,6 +15,7 @@ authors = [
 classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT",
 ]
 dependencies = [
     "pyfsdb",
