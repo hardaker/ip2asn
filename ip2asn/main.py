@@ -6,6 +6,7 @@ import argparse
 import sys
 import os
 import ip2asn
+import requests
 import pyfsdb
 import logging
 import ipaddress
@@ -21,6 +22,9 @@ def parse_args():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
                                      description="Describes one or more IP addresses from an ip2asn database",
                                      epilog="""Example Usage: ip2asn -f ip2asn-v4-43.tsv 1.1.1.1""")
+
+    parser.add_argument("--fetch", action="store_true",
+                        help="Fetch/update the cached IP2ASN dataset.")
 
     parser.add_argument("-f", "--ip2asn-database", type=str,
                         default=os.environ['HOME'] + "/lib/ip2asn-combined.tsv",
@@ -150,27 +154,56 @@ def process_fsdb(i2a, inh, outh, key, by_asn=False):
         outf.append(row)
 
 
-def main():
-    "The meat of the ip2asn script"
-    args = parse_args()
+def get_ip2asn_db_path(args, exit_on_error: bool = True):
+    "Find the ip2asn database if it exists."
+
+    database: str = os.environ['HOME'] + "/lib/ip2asn-combined.tsv"
 
     if Path(args.ip2asn_database).exists():
         database = args.ip2asn_database
     elif Path("ip2asn-combined.tsv").exists():
         info("using ./ip2asn-combined.tsv")
         database = "ip2asn-combined.tsv"
-    else:
+    elif exit_on_error:
         error("Cannot find the ip2asn-combined.tsv or other similar database file")
         error("Please specify a location with -f or download from ip2asn.com")
         sys.exit(1)
 
+    return database
+
+
+def fetch_ip2asn_db(storage_location: str):
+    # request_url = "https://iptoasn.com/data/ip2asn-combined.tsv.gz"
+    request_url = "https://dawn.hardakers.net/temp/ip2asn-combined.tsv.gz"
+    with requests.get(request_url, stream=True) as request:
+        if request.status_code != 200:
+            error(f"failed to fetch {request_url}")
+            sys.exit(1)
+
+        with open(storage_location, "wb") as storage:
+            for chunk in request.iter_content(chunk_size=4096*16):
+                storage.write(chunk)
+
+    info(f"saved new data to {storage_location}")
+
+def main():
+    "The meat of the ip2asn script"
+    args = parse_args()
+
+    database = get_ip2asn_db_path(args, exit_on_error=(not args.fetch))
+
+    print(f"{database}")
     i2a = ip2asn.IP2ASN(database, ipversion=None,
                         cache_contents=args.cache_database)
+
+    if args.fetch:
+        fetch_ip2asn_db(database)
+        sys.exit()
 
     if args.input_fsdb:
         process_fsdb(i2a, args.input_fsdb, args.output_file,
                      args.key, by_asn=args.search_by_asn)
-        exit()
+        sys.exit()
 
     if args.output_fsdb:
         outf = pyfsdb.Fsdb(out_file_handle = args.output_file)
