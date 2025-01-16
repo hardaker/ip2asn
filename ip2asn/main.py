@@ -173,8 +173,7 @@ def get_ip2asn_db_path(args, exit_on_error: bool = True):
 
 
 def fetch_ip2asn_db(storage_location: str):
-    # request_url = "https://iptoasn.com/data/ip2asn-combined.tsv.gz"
-    request_url = "https://dawn.hardakers.net/temp/ip2asn-combined.tsv.gz"
+    request_url = "https://iptoasn.com/data/ip2asn-combined.tsv.gz"
     with requests.get(request_url, stream=True) as request:
         if request.status_code != 200:
             error(f"failed to fetch {request_url}")
@@ -192,7 +191,6 @@ def main():
 
     database = get_ip2asn_db_path(args, exit_on_error=(not args.fetch))
 
-    print(f"{database}")
     i2a = ip2asn.IP2ASN(database, ipversion=None,
                         cache_contents=args.cache_database)
 
