@@ -4,6 +4,10 @@ A python class to search [ip2asn] information for matches.
 
 [ip2asn]: https://iptoasn.com/
 
+See the [pretty documentation] over on *readthedocs*.
+
+[pretty documentation]: https://ip2asn.readthedocs.io/en/latest/
+
 # Installation
 
 Using pip or pipx:
