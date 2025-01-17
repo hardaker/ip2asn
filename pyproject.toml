@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling==1.26.3"]
 build-backend = "hatchling.build"
 
 [project]
@@ -8,6 +8,7 @@ dynamic = ["version"]
 description = "A tool for doing differential analysis of pcap files"
 readme = "README.md"
 # license = "MIT"
+license = { file = "LICENSE.txt" }
 requires-python = ">=3.7"
 authors = [
     { name = "Wes Hardaker", email = "opensource@hardakers.net" },
