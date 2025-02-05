@@ -32,8 +32,10 @@ from typing import List
 from logging import error, warning
 from bisect import bisect
 
-class IP2ASN():
+
+class IP2ASN:
     """A container for accessing data within an ip2asn file"""
+
     def __init__(self, ip2asn_file, ipversion=None, cache_contents: bool = False):
         self._file = ip2asn_file
         self._version = ipversion
@@ -60,13 +62,15 @@ class IP2ASN():
     def save_large_numbers32(self, dataset: List[int]) -> List[int | List[int]]:
         transformmed = []
         for item in dataset:
-            if (item >= 2**32):
-                transformmed.append([
-                    (item & 0xffffffff000000000000000000000000) >> 12*8,
-                    (item & 0xffffffff0000000000000000) >> 8*8,
-                    (item & 0xffffffff00000000) >> 4*8,
-                    (item & 0xffffffff),
-                ])
+            if item >= 2**32:
+                transformmed.append(
+                    [
+                        (item & 0xFFFFFFFF000000000000000000000000) >> 12 * 8,
+                        (item & 0xFFFFFFFF0000000000000000) >> 8 * 8,
+                        (item & 0xFFFFFFFF00000000) >> 4 * 8,
+                        (item & 0xFFFFFFFF),
+                    ]
+                )
             else:
                 transformmed.append(item)
         return transformmed
@@ -75,19 +79,26 @@ class IP2ASN():
         transformmed = []
         for item in dataset:
             if isinstance(item, list):
-                item = (item[0] << 12*8) + (item[1] << 8*8) + (item[2] << 4*8) + (item[3])
+                item = (
+                    (item[0] << 12 * 8)
+                    + (item[1] << 8 * 8)
+                    + (item[2] << 4 * 8)
+                    + (item[3])
+                )
             transformmed.append(item)
         return transformmed
-        
+
     def save_large_numbers64(self, dataset: List[int]) -> List[int | List[int]]:
         """Convert a list of up to 128 bit integers and return an encoded list of 64 bit integers."""
         transformmed = []
         for item in dataset:
-            if (item >= 2**64):
-                transformmed.append([
-                    (item & 0xffffffffffffffff0000000000000000) >> 8*8,
-                    (item & 0xffffffffffffffff),
-                ])
+            if item >= 2**64:
+                transformmed.append(
+                    [
+                        (item & 0xFFFFFFFFFFFFFFFF0000000000000000) >> 8 * 8,
+                        (item & 0xFFFFFFFFFFFFFFFF),
+                    ]
+                )
             else:
                 transformmed.append(item)
         return transformmed
@@ -97,22 +108,22 @@ class IP2ASN():
         transformmed = []
         for item in dataset:
             if isinstance(item, list):
-                item = (item[0] << 8*8) + (item[1])
+                item = (item[0] << 8 * 8) + (item[1])
             transformmed.append(item)
         return transformmed
 
     def save_data_numbers64(self, dataset: List[int]) -> List[int | List[int]]:
         transformmed = deepcopy(dataset)
         for item in transformmed:
-            if (item[0] >= 2**64):
+            if item[0] >= 2**64:
                 item[0] = [
-                    (item[0] & 0xffffffffffffffff0000000000000000) >> 8*8,
-                    (item[0] & 0xffffffffffffffff),
+                    (item[0] & 0xFFFFFFFFFFFFFFFF0000000000000000) >> 8 * 8,
+                    (item[0] & 0xFFFFFFFFFFFFFFFF),
                 ]
-            if (item[1] >= 2**64):
+            if item[1] >= 2**64:
                 item[1] = [
-                    (item[1] & 0xffffffffffffffff0000000000000000) >> 8*8,
-                    (item[1] & 0xffffffffffffffff),
+                    (item[1] & 0xFFFFFFFFFFFFFFFF0000000000000000) >> 8 * 8,
+                    (item[1] & 0xFFFFFFFFFFFFFFFF),
                 ]
         return transformmed
 
@@ -121,9 +132,9 @@ class IP2ASN():
         transformmed = []
         for item in dataset:
             if isinstance(item[0], list):
-                item[0] = (item[0][0] << 8*8) + (item[0][1])
+                item[0] = (item[0][0] << 8 * 8) + (item[0][1])
             if isinstance(item[1], list):
-                item[1] = (item[1][0] << 8*8) + (item[1][1])
+                item[1] = (item[1][0] << 8 * 8) + (item[1][1])
             transformmed.append(item)
         return transformmed
 
@@ -133,24 +144,26 @@ class IP2ASN():
         if not os.path.exists(msgpack_filename):
             return False
 
-        contents = msgpack.load(open(msgpack_filename, 'rb'))
+        contents = msgpack.load(open(msgpack_filename, "rb"))
 
         if contents["version"] != __VERSION__:
-            warning(f"This ip2asn cache file was created with an older version ({contents['version']}) -- things may break.")
+            warning(
+                f"This ip2asn cache file was created with an older version ({contents['version']}) -- things may break."
+            )
 
-        self._data = self.load_data_numbers64(contents['data'])
-        self._left_keys = self.load_large_numbers64(contents['left_keys'])
-        self._start_col = contents["start_col"] 
-        self._end_col = contents["end_col"] 
-        self._asn_col = contents["asn_col"] 
-        self._country_col = contents["country_col"] 
-        self._name_col = contents["name_col"] 
+        self._data = self.load_data_numbers64(contents["data"])
+        self._left_keys = self.load_large_numbers64(contents["left_keys"])
+        self._start_col = contents["start_col"]
+        self._end_col = contents["end_col"]
+        self._asn_col = contents["asn_col"]
+        self._country_col = contents["country_col"]
+        self._name_col = contents["name_col"]
 
         return True
 
     def save_msgpack_file(self) -> None:
         """Save the stored data into a msgpack file."""
-        
+
         msgpack_filename = self.file_name + self._msgpack_extension
 
         contents = {
@@ -176,14 +189,18 @@ class IP2ASN():
             iptoasn = pyfsdb.Fsdb(self._file)
         else:
             # assume it's a file handle instead
-            iptoasn = pyfsdb.Fsdb(file_handle = self._file)
+            iptoasn = pyfsdb.Fsdb(file_handle=self._file)
 
         # set the column names for pyfsdb
-        iptoasn.column_names = ['start','end','ASN', 'country','name']
+        iptoasn.column_names = ["start", "end", "ASN", "country", "name"]
 
-        (self._start_col, self._end_col,
-         self._asn_col, self._country_col,
-         self._name_col) = iptoasn.get_column_numbers(iptoasn.column_names)
+        (
+            self._start_col,
+            self._end_col,
+            self._asn_col,
+            self._country_col,
+            self._name_col,
+        ) = iptoasn.get_column_numbers(iptoasn.column_names)
 
         # XXX: fsdb should do this for us
         self._data = []
@@ -206,9 +223,9 @@ class IP2ASN():
 
     def ip2int(self, address, version=None):
         """Converts an ascii represented IPv4 or IPv6 address into an
-           integer.  If the ipversion isn't specified (4 or 6), it
-           will attempt to guess based on whether the address has 
-           a ':' character in it"""
+        integer.  If the ipversion isn't specified (4 or 6), it
+        will attempt to guess based on whether the address has
+        a ':' character in it"""
         if version is None:
             if self._version:
                 verison = self._version
@@ -236,12 +253,12 @@ class IP2ASN():
 
         point = bisect(self._left_keys, ip)
         if point != len(self._left_keys):
-            row = self._data[point-1]
+            row = self._data[point - 1]
             if ip >= row[self._start_col] and ip <= row[self._end_col]:
                 return row
-            
+
     def lookup_address(self, address):
-        """Look up an ip address (dotted string) and return a 
+        """Look up an ip address (dotted string) and return a
         dictionary of information about it.
         (transforming the row returned by lookup_address_row)"""
         results = self.lookup_address_row(address)
@@ -249,30 +266,29 @@ class IP2ASN():
             return results
         ip = self.ip2int(address)
         return {
-            'ip_text': address,
-            'ip_numeric': ip,
-            'ip_range': [results[self._start_col], results[self._end_col]],
-            'ASN': results[self._asn_col],
-            'country': results[self._country_col],
-            'owner': results[self._name_col],
+            "ip_text": address,
+            "ip_numeric": ip,
+            "ip_range": [results[self._start_col], results[self._end_col]],
+            "ASN": results[self._asn_col],
+            "country": results[self._country_col],
+            "owner": results[self._name_col],
         }
 
     def lookup_asn(self, asn, limit=None):
         """Lookups all the entries in the database containing a
         particular ASN"""
 
-        asn = str(asn) # turn an into back to a string
+        asn = str(asn)  # turn an into back to a string
 
         results = []
         for record in self._data:
             if record[self._asn_col] == asn:
                 results.append(
                     {
-                        'ip_range': [record[self._start_col],
-                                     record[self._end_col]],
-                        'ASN': record[self._asn_col],
-                        'country': record[self._country_col],
-                        'owner': record[self._name_col],
+                        "ip_range": [record[self._start_col], record[self._end_col]],
+                        "ASN": record[self._asn_col],
+                        "country": record[self._country_col],
+                        "owner": record[self._name_col],
                     }
                 )
                 if limit and len(results) == limit:
@@ -280,11 +296,13 @@ class IP2ASN():
 
         return results
 
+
 def testmain():
     import os
-    t = IP2ASN(os.environ['HOME'] + "/lib/ip2asn-v4-u32.tsv")
+
+    t = IP2ASN(os.environ["HOME"] + "/lib/ip2asn-v4-u32.tsv")
     print(t.lookup_address("8.8.8.8"))
+
 
 if __name__ == "__main__":
     testmain()
-
