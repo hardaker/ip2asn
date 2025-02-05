@@ -16,6 +16,7 @@ from pathlib import Path
 COLUMN_NAMES = ['address', 'ip_numeric', 'ASN', 'owner', 'country', 'ip_range']
 ASN_COLUMN_NAMES = ['ASN', 'owner', 'country', 'ip_range']
 
+default_store = Path(os.environ['HOME']).joinpath(".local/ip2asn/database.tsv")
 
 def parse_args():
     """Handles argument parsing for the ip2asn script."""
@@ -27,7 +28,7 @@ def parse_args():
                         help="Fetch/update the cached IP2ASN dataset.")
 
     parser.add_argument("-f", "--ip2asn-database", type=str,
-                        default=os.environ['HOME'] + "/lib/ip2asn-combined.tsv",
+                        default=default_store,
                         help="The ip2asn database file to use (download from iptoasn.com)")
 
     parser.add_argument("-a", "--search-by-asn", action="store_true",
@@ -157,7 +158,7 @@ def process_fsdb(i2a, inh, outh, key, by_asn=False):
 def get_ip2asn_db_path(args, exit_on_error: bool = True):
     "Find the ip2asn database if it exists."
 
-    database: str = os.environ['HOME'] + "/lib/ip2asn-combined.tsv"
+    database: str = default_store
 
     if Path(args.ip2asn_database).exists():
         database = args.ip2asn_database
@@ -176,16 +177,28 @@ def get_ip2asn_db_path(args, exit_on_error: bool = True):
 
 def fetch_ip2asn_db(storage_location: str):
     request_url = "https://iptoasn.com/data/ip2asn-combined.tsv.gz"
+
+    info(f"starting download")
+
+    # convert to a Path
+    if not isinstance(storage_location, Path):
+        storage_location = Path(storage_location)
+        
+    if not storage_location.parent.is_dir():
+        storage_location.parent.mkdir(parents=True)
+
+    # fetch the contents to our storage location
     with requests.get(request_url, stream=True) as request:
         if request.status_code != 200:
             error(f"failed to fetch {request_url}")
             sys.exit(1)
 
-        with open(storage_location, "wb") as storage:
+        with storage_location.open("wb") as storage:
             for chunk in request.iter_content(chunk_size=4096*16):
                 storage.write(chunk)
 
     info(f"saved new data to {storage_location}")
+
 
 def main():
     "The meat of the ip2asn script"
@@ -193,12 +206,12 @@ def main():
 
     database = get_ip2asn_db_path(args, exit_on_error=(not args.fetch))
 
-    i2a = ip2asn.IP2ASN(database, ipversion=None,
-                        cache_contents=args.cache_database)
-
     if args.fetch:
         fetch_ip2asn_db(database)
         sys.exit()
+
+    i2a = ip2asn.IP2ASN(str(database), ipversion=None,
+                        cache_contents=args.cache_database)
 
     if args.input_fsdb:
         process_fsdb(i2a, args.input_fsdb, args.output_file,
