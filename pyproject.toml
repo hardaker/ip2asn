@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "ip2asn"
 dynamic = ["version"]
-description = "A tool for doing differential analysis of pcap files"
+description = "Quickly look up ownership information about IP addresses"
 readme = "README.md"
 # license = "MIT"
 license = { file = "LICENSE.txt" }
