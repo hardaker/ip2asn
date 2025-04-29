@@ -30,13 +30,13 @@ Make sure it works and turn on caching to cache the results:
 
 ::
 
-   $ ip2asn -C 10.0.0.1
-   Address: 10.0.0.1
-     Numeric ip: 167772161
-            ASN: 0
-          Owner: Not routed
-        Country: None
-       ip_range: [166461440, 184549375]
+   $ ip2asn 170.247.170.2
+   Address: 170.247.170.2
+     Numeric ip: 2868357634
+            ASN: 394353
+          Owner: BROOT-AS
+        Country: US
+       ip_range: 170.247.170.0 - 170.247.171.255
 
 Usage
 =====
@@ -57,6 +57,7 @@ order greatly speed future runs).
           Owner: GOOGLE
         Country: US
        ip_range: [134744064, 134744319]   
+
    
 
 Searching by an ASN number
