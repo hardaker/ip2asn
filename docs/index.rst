@@ -56,8 +56,7 @@ order greatly speed future runs).
             ASN: 15169
           Owner: GOOGLE
         Country: US
-       ip_range: [134744064, 134744319]   
-
+       ip_range: 8.8.8.0 - 8.8.8.255
    
 
 Searching by an ASN number
@@ -69,16 +68,15 @@ You can also find information directly about an ASN number using the
 ::
 
    $ ip2asn -a 394353
-            ASN: 394353
-          Owner: BROOT-AS
-        Country: US
-       ip_range: [2868357632, 2868358143]
-   
-            ASN: 394353
-          Owner: BROOT-AS
-        Country: US
-       ip_range: [3236187904, 3236188159]
-   ...
+         ASN: 394353
+       Owner: BROOT-AS
+     Country: US
+    ip_range: 170.247.170.0 - 170.247.171.255
+
+         ASN: 394353
+       Owner: BROOT-AS
+     Country: US
+    ip_range: 192.228.79.0 - 192.228.79.255   ...
 
 Creating machine readable output
 --------------------------------
