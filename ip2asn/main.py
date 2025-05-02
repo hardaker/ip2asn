@@ -128,10 +128,12 @@ def print_result(to, address, result):
     to.write("         ASN: {}\n".format(result["ASN"]))
     to.write("       Owner: {}\n".format(result["owner"]))
     to.write("     Country: {}\n".format(result["country"]))
-    if ":" in address:
-        range_addresses = [str(ipaddress.IPv6Address(x)) for x in result["ip_range"]]
-    else:
+
+    try:
         range_addresses = [str(ipaddress.IPv4Address(x)) for x in result["ip_range"]]
+    except Exception:
+        range_addresses = [str(ipaddress.IPv6Address(x)) for x in result["ip_range"]]
+
     to.write("    ip_range: {} - {}\n".format(*range_addresses))
     to.write("\n")
 
