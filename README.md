@@ -36,7 +36,7 @@ Address: 8.8.8.8
          ASN: 15169
        Owner: GOOGLE - Google LLC
      Country: US
-    ip_range: [134744064, 134744319]
+    ip_range: 8.8.8.0 - 8.8.8.255
 ```
 
 ### Searching for an ASN
@@ -45,17 +45,17 @@ Address: 8.8.8.8
 # ip2asn -a 15169
 
          ASN: 15169
-       Owner: GOOGLE - Google LLC
+       Owner: GOOGLE
      Country: US
-    ip_range: [134743040, 134743295]
+    ip_range: 8.8.4.0 - 8.8.4.255
 
          ASN: 15169
-       Owner: GOOGLE - Google LLC
+       Owner: GOOGLE
      Country: US
-    ip_range: [134744064, 134744319]
+    ip_range: 8.8.8.0 - 8.8.8.255
 
          ASN: 15169
-       Owner: GOOGLE - Google LLC
+       Owner: GOOGLE
 ...
 (google has a lot of registrations)
 ```
