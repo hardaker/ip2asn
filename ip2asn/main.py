@@ -16,8 +16,7 @@ from pathlib import Path
 COLUMN_NAMES = ["address", "ip_numeric", "ASN", "owner", "country", "ip_range"]
 ASN_COLUMN_NAMES = ["ASN", "owner", "country", "ip_range"]
 
-default_store = Path(os.environ["HOME"]).joinpath(".local/share/ip2asn/database.tsv")
-
+default_store = ip2asn.DEFAULT_IP2ASN_FILE
 
 def parse_args():
     """Handles argument parsing for the ip2asn script."""
