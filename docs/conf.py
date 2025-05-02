@@ -9,7 +9,7 @@
 project = 'ip2asn'
 copyright = '2020-2025, Wes Hardaker'
 author = 'Wes Hardaker'
-release = '1.6.3'
+release = '1.6.4'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
