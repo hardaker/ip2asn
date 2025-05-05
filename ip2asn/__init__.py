@@ -192,7 +192,7 @@ class IP2ASN:
             iptoasn = pyfsdb.Fsdb(self._file)
         else:
             # assume it's a file handle instead
-            iptoasn = pyfsdb.Fsdb(file_handle=self._file)
+            iptoasn = pyfsdb.Fsdb(file_handle=self._file.open())
 
         # set the column names for pyfsdb
         iptoasn.column_names = ["start", "end", "ASN", "country", "name"]
@@ -229,21 +229,17 @@ class IP2ASN:
         integer.  If the ipversion isn't specified (4 or 6), it
         will attempt to guess based on whether the address has
         a ':' character in it"""
-        if version is None:
-            if self._version:
-                verison = self._version
-            elif ":" in address:
-                version = 6
-            elif "." in address:
-                version = 4
-            else:
-                raise ValueError(f"unknown address type: {address}")
         if version == 4:
             ip = int(ipaddress.IPv4Address(address))
         elif version == 6:
             ip = int(ipaddress.IPv6Address(address))
         else:
-            if address.find(":") != -1:
+            if isinstance(address, bytes):
+                if len(address) == 4:
+                    ip = int(ipaddress.IPv4Address(address))
+                else:
+                    ip = int(ipaddress.IPv6Address(address))
+            elif address.find(":") != -1:
                 ip = int(ipaddress.IPv6Address(address))
             else:
                 ip = int(ipaddress.IPv4Address(address))
