@@ -27,7 +27,7 @@ import io
 from pathlib import Path
 from copy import deepcopy
 
-__VERSION__ = "1.6.5"
+__VERSION__ = "1.6.6"
 
 from typing import List
 from logging import error, warning
