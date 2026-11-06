@@ -92,9 +92,9 @@ def parse_args():
 
     parser.add_argument(
         "-C",
-        "--cache-database",
-        action="store_true",
-        help="After loading the ip2asn file, cache it in a msgpack file for faster loading next time.",
+        "--dont-use-cache",
+        action="store_false",
+        help="Do not use the caching mechanism -- do not create a faster-loading msgpack file.",
     )
 
     parser.add_argument(
@@ -267,7 +267,7 @@ def main():
         sys.exit()
 
     i2a = ip2asn.IP2ASN(
-        str(database), ipversion=None, cache_contents=args.cache_database
+        str(database), ipversion=None, cache_contents=not args.dont_use_cache
     )
 
     if args.input_fsdb:
