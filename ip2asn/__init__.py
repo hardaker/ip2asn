@@ -38,7 +38,7 @@ DEFAULT_IP2ASN_FILE = Path(os.environ["HOME"]).joinpath(".local/share/ip2asn/dat
 class IP2ASN:
     """A container for accessing data within an ip2asn file"""
 
-    def __init__(self, ip2asn_file = DEFAULT_IP2ASN_FILE, ipversion=None, cache_contents: bool = False):
+    def __init__(self, ip2asn_file = DEFAULT_IP2ASN_FILE, ipversion=None, cache_contents: bool = True):
 
         self._file = ip2asn_file
         self._version = ipversion
