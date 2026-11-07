@@ -7,9 +7,9 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'ip2asn'
-copyright = '2020-2025, Wes Hardaker'
+copyright = '2020-2026, Wes Hardaker'
 author = 'Wes Hardaker'
-release = '1.6.6'
+release = '1.7'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
