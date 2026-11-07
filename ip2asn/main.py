@@ -91,9 +91,9 @@ def parse_args():
     )
 
     parser.add_argument(
-        "-C",
+        "-N",
         "--dont-use-cache",
-        action="store_false",
+        action="store_true",
         help="Do not use the caching mechanism -- do not create a faster-loading msgpack file.",
     )
 

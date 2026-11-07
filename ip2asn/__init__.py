@@ -44,6 +44,7 @@ class IP2ASN:
         self._version = ipversion
 
         self._msgpack_extension = ".msgpack"
+        self._cache_contents = cache_contents
 
         # TODO(hardaker): this probably shouldn't be forced called in init()
         self.read_data(cache_contents)
@@ -143,6 +144,9 @@ class IP2ASN:
 
     def read_msgpack_file(self) -> bool:
         """Read a msgpack compressed version of the database if available."""
+        if not self._cache_contents:
+            return False
+
         msgpack_filename = self.file_name + self._msgpack_extension
         if not os.path.exists(msgpack_filename):
             return False
@@ -168,6 +172,17 @@ class IP2ASN:
         """Save the stored data into a msgpack file."""
 
         msgpack_filename = self.file_name + self._msgpack_extension
+
+        age_file_name = Path(self.file_name).stat().st_mtime
+
+        # check the age of the cache file, if it exists
+        age_cache_file = 0
+        if Path(msgpack_filename).exists():
+            age_cache_file = Path(msgpack_filename).stat().st_mtime
+
+        if age_cache_file >= age_file_name:
+            # already recently cached
+            return
 
         contents = {
             "version": __VERSION__,
